@@ -2,7 +2,19 @@
 \usepackage[colorlinks=true]{hyperref}
 \usepackage{graphicx}
 \usepackage{caption}
+\usepackage{titlesec}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{amsmath}
+\setcounter{secnumdepth}{5}
+\setcounter{tocdepth}{5}
+
+\titleformat{\paragraph}{\normalfont\Large\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}{0pt}{3.5ex plus 1ex minus .2ex}{2.3ex plus .2ex}
+
 \begin{document}
+
 %simple command to add a figure 
 %\myfigure{address}{caption}{width}
 \newcommand{\myfigure}[3]{
@@ -12,6 +24,7 @@
   \caption{#2}
 \end{figure}
 }
+
 \title{\huge KUKA Youbot Autonomous Robot: Controls and Planning Technical Plan}
 \author{Ze Che\\
  \and
@@ -32,7 +45,6 @@ GTRI Robotics VIP Team
 }
 \maketitle
 \tableofcontents
-\newpage
 \section{Introduction}
 In the field of agriculture, there is a constant issue of labor cost vs consumer prices. Because of the naturally erratic nature of plant-life, harvesting presents a particularly complex problem to both hardware and software and has thus been left to seasonal workers, which in both recent and coming years has driven the price of produce up as the wage of these workers has risen. With this in mind, it is imperative that a system to replace these costs step in to fill the gap in order to keep consumer prices down. Already, there are products out there that are in the early stages of this task, with examples such as the Intelligent Robotic Vineyard Pruner from Vision Robotics Corp. and Wall-Ye V.I.N. by Christopher Millot serving the needs of wine-makers and the Robotic Strawberry Harvester by Robotic Harvesting, LLC serving to collect strawberries.
 \begin{figure}[h!]
@@ -49,9 +61,7 @@ In the field of agriculture, there is a constant issue of labor cost vs consumer
 \end{minipage}
 \end{figure}
 However, as previously stated, the simple task of picking produce is very complicated. In general, an automated system must be able to first distinguish that the produce exists amongst other real-world objects, then go through a series of motions and information transactions in order to retrieve the produce safely, then navigate its sensors to the next possible location of produce to start the process over again.
-
 \myfigure{Images/greenTracktor.jpg}{Robotic Strawberry Harvester by Robotic Harvesting, LLC}{.5}
-
 With this in mind, the goal of this research is to produce a system by which an autonomous robot can, after detection of its target, maneuver a robotic arm through obstacles to capture and retrieve the detected produce. When used in concert with the work from our Perception and Mapping team developments through the robot produced by our Modification team, our target will be a green bell pepper, but it is planned that the robot will be able to function with other produce targets and will be able to be tailored to other robots of similar construction. The boon this will offer to the agricultural industry is obvious, as it greatly reduces the cost to only the initial price of the robot, power, and the manpower necessary to provide maintenance for the machine, which may be left to warranty or the owner.
 \section{Goals}
 When completed, the program will be able to process location data from a world map for navigation, know when a target has been perceived, guide the picking arm to its target in real time, and plot and execute a route to the location of a potential target. These tasks will be broken up as follows:
@@ -82,7 +92,7 @@ The Youbot API consists of C++ open source libraries not only provides access to
 
 Another important aspect of the Youbot API is that it encapsulates EtherCAT communication. Along with the EthercatMaster, the API provides a method of communication between the user application and the Youbot. Running an API with communication thread usually has a default cycle time of 1ms while running the API without a constant communication thread requires manual calls to methods such as sendProcessData() and receiveProcessData() scheduled by a real-time operating system (RTOS).
 \myfigure{Images/youbotDriverOverview.png}{Diagram describing the communication threads and interactions within Youbot and between Youbot and user applications.}{.5}
-\subsection{Search Algorithms}
+\subsection{Path-Planning Algorithms}
 \subsubsection{Graph Traversal Algorithms}
 Finding the best shortest path in a workspace for a robot can be both challenging and frustrating. There are many processes that go into account concerning motion planning for the robot. Encompassing many applications, autonomy is the important key for our project as our goal is to create an autonomous robotic system. Motion planning algorithms are thus crucial in order to produce a continuous motion while avoiding collisions. One of the algorithms we will be considering is A* which is one of the most popular choices for pathfinding due to its flexibility. A* uses a best-first search, which is a search algorithm that navigates a graph of one or more goal points, or nodes. Like other graph-searching algorithms, in which it is capable of searching a huge area, one of the first steps before the beginning of the A* algorithm would be to simplify the search area before finding the path. At the starting point, a search is conducted taking into account the nodes around. Once the surrounding area is taken into account, the starting point is designated as a point of no interest or a closed node since the next step would be to take the first step on the path to the ending goal.
 \myfigure{Images/planningProblem.png}{A model of the search area.}{.5}
@@ -90,6 +100,68 @@ Which direction to take is the question that is taken into consideration as the 
 \myfigure{Images/planningSolution.png}{A\* revealing the path to the goal}{.5}
 While A* is widely used, there are other algorithms to take into account as well. D* is another approach in searching and pathfinding. In contrast to A*, D* begins searching by working backwards from the goal point. By producing a path based on given and assumed data, a path can be created while it is progressively updated due to any new information given about its surrounding area. This process is repeated until the destination coordinates are reached or if it’s been determined that there is no possible path. Similar to A*, D* maintains a list of nodes that are marked by a certain condition to be analyzed. RAISE and LOWER are two states specific to D* in which they reveal the cost of a node to be either higher or lower than the previous cost. Before a cost can be increased, the algorithm will check the neighboring nodes and observe if a deduction cost can be taken. If it is not possible, the RAISE state will spread among the nodes that contain backpointers which aid in developing the path. A backpointer denotes the next node directing to the target. The path will eventually be unveiled by following the backpointers. D* proves to be an efficient search algorithm while A* provides the shortest, lowest cost path, therefore it will be interesting to see which algorithm will work the best for our project.
 \myfigure{Images/DStarMap.png}{A map revealing a path created by D\*}{.5}
+\subsubsection{Random-Sampling Algorithms}
+Previously, we have dealt with algorithms ideal for the relatively simple problem of 2D planning. These graph-search algorithms will promise completion and optimality when implemented correctly. Unfortunately, in order to achieve these promises we are going to have to pay the cost of a larger time complexity. In the 2D case we can handle with this time complexity simply because the data set can be handled effectively. However, when we are dealing with higher dimensions, (as is necessary when planning for a 5 degree of freedom robotic arm) we must utilize other algorithms that can find a solution in a reasonable amount of time. This family of algorithms does not promise completion or optimality. However, their ability to quickly explore such high-dimensional spaces, gives them a unique advantage when it comes to path-planning.
+\paragraph{Rapidly-Randomly Exploring Trees}
+The very most basic of these sample-based planning algorithms is the Rapidly Randomly Exploring Trees Algorithm. The most important points of this algorithms is that it is not able to promise us neither optimality(finding the best path) or completeness(finding a path if it exists). Another feature of this algorithm is that as we can see in the figures, the paths it creates are very erratic and far from a smooth trajectory we would like to see.Still, we can easily solve this problem with some path trimming. This process is simply taking points A and B which are connected through C and try to make a straight line between the two. We do this by checking if any point in the straight line has an obstacle. If it doesn't we simply remove point C and claim A and B to be connected with a straight line. The way our data structure will work, it is assumed that all points are connected by a straight line which means we would simply be removing C from the data structure.
+The main feature of this algorithm is that it can relatively quickly find a viable path from which we can work on. Given the fact that we will be using threading in our application, it is essential to remember that we will have to use the most efficient algorithm to ensure that our path is relevant to the visual data we have.
+The following is a rundown of the algorithm that is the core of all RRT's:
+\begin{algorithm}
+\caption{: BuildRRT}\\
+Input: Initial configuration $q_{init}$, number of vertices in the RRT K, incremental distance $\Delta q$\\
+Output: RRT graph $G$
+\begin{algorithmic}[1]
+\Function{G.init}{$q_{init}$}
+\For{$k = 1$ \textbf{to} $K$}
+\State $q_{rand} \gets \Call{RAND\_CONF}{}$
+\State $q_{near} \gets \Call{NEAREST\_VERTEX}{q_{rand}, G}$
+\State $q_{new} \gets \Call{NEW\_CONF}{q_{near}, q_{rand}, \Delta q}$
+\State $G.\Call{add\_vertex}{q_{new}}$
+\State$G.\Call{add\_edge}{q_{near}, q_{new}}$
+\EndFor
+\State \Return $G$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+The process of building the RRT is rather simple. We need the initial position or $q_{init}$. We begin by adding this point to the tree. After that, we generate a random configuration in the space. It is important to note that we may constraint the search space so that only valid outputs are produced here. After that, we find the configuration in our tree that has the closest distance to the random point that is $q_{near}$. Still, we cannot add the random point for it could be a very long distance from even the nearest point in the tree. Thus we find the $q_{new}$ which is the a point a distance $\delta q$ from the $q_{near}$ in the direction of $q_{rand}$. That is finally the point that we add to the tree. The extension of this algorithm into a full planning algorithm is simply the addition of a stop condition when the goal is added to the tree.
+Specifically for our purposes, all we are interested in doing is re-implementing RRT's with usability, extensibility and generality in mind. Ultimately, though, a simple RRT is only the beginning of what we intend to do with this application.
+\paragraph{Bidirectional RRT's}
+Soon after RRT's were discovered, we realized there was a way that could solve such hard multi-dimensional problems with ease. This method was simply adding another tree at the goal of our planning problem. These though, would be biased to select the nearest points in the other after a certain number of random selections. The result would be the generation of two large exploring trees that would grow towards each other. The algorithm is very similar to that of the original RRT's except it updates two trees.
+\begin{algorithm}
+\caption{: Bidirectional Build RRT}
+\begin{algorithmic}
+\Function{RDT\_BALANCED\_BIDIRECTIONAL}{$q_{I},q_{G}$}
+\For{$i=1 \textbf{to} K$}
+\State $q_{n}$ \gets \Call{NEAREST}{$S_{a}, \alpha(i)$}
+\State $q_{s}$ \gets \Call{STOPPING-CONFIGURATION}{$q_{n}, \alpha(i)$}
+\If{$q_{s} \neq q_{n}$}
+\State \Call{$T_{a}.add\_vertex$}{$q_{s}$}
+\State \Call{$T_{a}.add\_edge$}{$q_{n}, q_{s}$}
+\State $q_{n}'$ \gets \Call{NEAREST}{$S_{b}, q_{s}$}
+\State $q_{s}'$ \gets \Call{STOPPING-CONFIGURATION}{$q_{n}', q_{s}$}
+\If{$q'_{s} \neq q_{n}'$}
+\State \Call{$T_{b}.add\_vertex$}{$q_{s}'$}
+\State \Call{$T_{b}.add\_edge$}{$q'_{n},q_{s}'$}
+\If{$q_{s}' \eq q_{s}$}
+\State \Return SOLUTION
+\EndIf
+\If{$\abs{T_{b}}>abs{T_{a}}$}
+\State $\Call{SWAP}{T_{a},T_{b}}$
+\EndIf
+\EndIf
+\EndIf
+\EndFor
+\State r\Return FAILURE
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+As you can see, all we are doing is growing two RRT's and making sure that they are balanced. This means that no tree is larger and the other. It is important to take into account that sometimes we switch the tree at $T_{a}$ with the tree at $T_{b}$. Still this is not much different than doubly implementing the previous algorithm with a slight twist. Despite the simplicity though, the improvements in speed are significant.
+\paragraph{RRT*}
+RRT* holds the same principles as the original RRT's. You are using random sampling to generate a path. That however, is where the similarities end. This Algorithm utilizes the dynamic programming to ``rewire'' the tree whenever it receives information from a new random point.  This means that this new version means that it is asymptotic optimal. This means that the longer you run the algorithm the more it will approach optimality. this might be useful if we have condition that allow us extra computing time between time-steps. This, however, comes at a cost. The algorithm maintains additional information from what is usually kept in a simple RRT. Although we incur a heavy memory cost, this optimality could be extremely could prove useful.
+Despite the advantages of the algorithm, we must remember that an there is also an intrinsic difficulty in the complexity of implementing the algorithm. In this case, we are dealing with five different sub-algorithms that coalesce into the results we see. 
+\paragraph{RRT\#}
+Finally, RRT\# is our ultimate end-game for RRT's. Having been recently developed this is an even more advanced rework of RRT*. The idea behind RRT\# is that we can improve our memory usage and speed by only keeping points that are locally relevant to our area of search and that therefore have a possibility of being optimal. Unfortunately, once again, the problem arises from the sheer complexity of implementing this algorithm. Since we would have basic planning functionality for the arm with only implementing basic RRT's it is worth considering implementing this algorithm as a challenge that may add to the functionality of our program but will do nothing more than optimize an existing basic functionality.
 \section{Collaboration}
 Since the team’s responsibilities span from planning the robots route to implementing and controlling the robot’s movement, it is easier for other sub-teams to picture this team’s pipeline as a “black box”. Information transfer and implementation within the team will be independent from the processes of the other sub-teams. The idea is to create an application with the necessary APIs to communicate with other teams while dealing with inputs from other teams within our application. Specifics of the interfaces between other sub-teams will have to be discussed during the beginning phases of the project. It is crucial for each sub-team to recognize required inputs and possible output formats. For example, in order to generate the best route using mapping team’s data, the planning team will have to be able to process the output data for the map. Will the agreed format be .vtk generated from navigation meshes (the mapping algorithm from previous semester) or will the mapping team decide to explore other possible mapping algorithms? Questions like these will have to answer through cross-team discussion in order to successfully implement the interface.
 
@@ -97,8 +169,25 @@ Information from the mapping team will be utilized to generate the most efficien
 
 Aside from weekly meetings that will allow each team to update their progresses, urgent questions regarding implementation details can be posted and answered utilizing the team’s forum. With each team member capable of posting questions, answers, and follow-ups, confusion about other team’s work can be minimized. Furthermore, blog posts regarding each individual’s work on his/her research will also allow teammates to understand the technology and research utilized during the progression of the project.
 \section{Conclusion}
+\newpage
 \begin{thebibliography}{20}
+\bibitem{VisionRobotics} \href{http://visionrobotics.com/vrc/index.php?option=com_zoom&Itemid=26&catid=6}{Vision Robotics}
+\bibitem{wallye} \href{http://wall-ye.com/}{Wall-Ye}
+\bibitem{roboticcharvest} \href{http://www.roboticharvesting.com/products.html}{Robotic Harvesting}
+\bibitem{kuka} \href{http://www.kuka-labs.com/en/service_robotics/research_education/youbot/}{Kuka Labs}
+\bibitem{robocup} \href{http://www.robocupatwork.org/download/RoboCup-At-Work_Camp_2012/RAW_Camp2012-Jan-Paulus_youBotAPI.pdf}{RoboCup}
+\bibitem{metu} \href{http://www.eee.metu.edu.tr/~ee402/2013/EE402RecitationReport_4.pdf}{Metu}
+\bibitem{Astar} \href{http://en.wikipedia.org/wiki/A*_search_algorithm}{A*}
+\bibitem{AstarTutorial} \href{http://www.policyalmanac.org/games/aStarTutorial.htm}{A* Tutorial}
+\bibitem{AstarCompare} \href{http://theory.stanford.edu/~amitp/GameProgramming/AStarComparison.html}{A* Comparison}
+\bibitem{heuristics} \href{http://www.policyalmanac.org/games/heuristics.htm}{Heuristics}
+\bibitem{dynamicp} \href{http://www.frc.ri.cmu.edu/~axs/dynamic_plan.html}{Dynamic Planning}
+\bibitem{dstar} \href{http://en.wikipedia.org/wiki/D*}{D*}
 \bibitem{RRT} \href{http://msl.cs.uiuc.edu/rrt/papers.html}{Rapidly-Exploring Random Trees}
+\bibitem{RRTBidi} \href{http://people.csail.mit.edu/aperez/obirrt/}{Bidirectional RRTs}
+\bibitem{RRTstar} \href{http://sertac.scripts.mit.edu/web/?page_id=15}{RRT*}
+\bibitem{RRTsharp} \href{http://ieeexplore.ieee.org/xpl/login.jsp?tp=&arnumber=6630906&url=http://ieeexplore.ieee.org/iel7/6615630/6630547/06630906.pdf?arnumber=6630906}{RRT\#}
+\bibitem{kdtree} \href{https://www.cise.ufl.edu/class/cot5520fa09/CG_RangeKDtrees.pdf}{K-D Trees}
 \end{thebibliography}
 
 \end{document}
