@@ -1,0 +1,277 @@
+\documentclass[pdf]{beamer}
+\usepackage{media9}
+\usepackage{graphicx}
+\usepackage{multicol}
+
+\mode<presentation>{\usetheme{Warsaw}}
+%%preamble
+\title{Planning And Controls Team}
+\author{Ivan Dario Jimenez \and Ze Che \and Myron Lee \and Abraham Marsen \and Edward Aquilar \and Chenkai Shao}
+%%preamble ends
+
+\begin{document}
+
+\newcommand{\myfigure}[3]{
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=#3\textwidth]{#1}
+  \caption{#2}
+\end{figure}
+}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+ \begin{frame}{Outline}
+   \begin{multicols}{2}
+    \tableofcontents     
+   \end{multicols}
+ \end{frame}
+
+\section{Introduction}
+
+\begin{frame}{The General Problem}
+  \begin{itemize}
+  \item Identify target in environment
+  \item Approach Target
+  \item Interact in a useful way with it(picking)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Our Role}
+  \begin{itemize}
+  \item Bridge between environment information and physical robot.
+  \item Planning: Generate Output from sensory inputs
+  \item Sensor-Robot Interface: Generate useful commands for the robot to follow.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Controls And Planning Work}
+  \begin{itemize}
+  \item Consolidate Planning Application
+  \item Advanced mechanism/pipeline for communication with Planning
+    \begin{itemize}
+    \item Constant update and r/w
+    \end{itemize}
+   \item High-Level Algorithm
+     \begin{itemize}
+     \item Explore efficiency of various algorithm
+     \item Collaboration with Mapping through established API
+     \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\section{Background}
+\subsection{OpenRave}
+\begin{frame}{OpenRAVE}
+  \begin{itemize}
+  \item Open Source
+  \item Allows Sensor Integration
+  \item capable of IK, FK, path and grasp planning
+  \end{itemize}
+  \myfigure{Images/OpenRave.png}{OpenRAVE in action}{0.5}
+\end{frame}
+
+\subsection{VREP}
+\begin{frame}{VREP}
+  \begin{itemize}
+  \item Composed of 3 elements:
+    \begin{itemize}
+    \item Control Mechanisms
+    \item Calculation Modules
+    \item Scene Objects
+    \end{itemize}
+  \item Well Documented
+  \item Friendly API and interface
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{VREP features}
+  \begin{columns}
+    \column{0.5\textwidth}
+    \myfigure{Images/VREPf1}{Visual Simulator Features}{1}
+    \column{0.5\textwidth}
+    \myfigure{Images/VREPf2}{Additional control features}{1}
+  \end{columns}
+\end{frame}
+
+\section{Component Details}
+
+\subsection{Controls}
+\begin{frame}{Youbot Controller}
+  \begin{itemize}
+  \item Each joint composed of ARM Cortex-M3 controller
+  \item PID Control
+  \end{itemize}
+  \myfigure{Images/controllerDesign.png}{Position Controller in which the$n$ stands for motor positions, $e$ for errors, and other variables are optimized parameters.}{1}
+\end{frame}
+
+\begin{frame}{Youbot API}
+  \begin{itemize}
+  \item Youbot library provides full firmware functionality
+   \item Support joint-level control
+   \item Encapsulates EtherCAT communication
+   \item Manipulator movement within the Cartesian Space is not supported
+  \end{itemize}
+\end{frame}
+
+\subsection{Software Design}
+
+\subsubsection{Architecture}
+\begin{frame}{Goals}
+  \begin{itemize}
+  \item Test-Driven Application(Hardest Part of Algorithms)
+  \item Easily Extendable and Reusable for Future Iterations
+  \item Decoupled For independent Library Use
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Our Role In The Application}
+  \begin{itemize}
+  \item Must Be to Able handle planning of several components
+  \item Flexibility is a requirement given the variety of inputs
+  \end{itemize}
+\myfigure{Images/SimpleApplicationDiagram.jpg}{Our Role in the robot}{0.25}
+\end{frame}
+
+\begin{frame}{Application Diagram}
+\myfigure{Images/SoftwareDesign/OverallApplication}{A UML Diagram Of the Application}{1}
+\end{frame}
+
+\subsubsection{Threading}
+\begin{frame}{Threading}
+  \begin{itemize}
+  \item Robotic Arm Planning
+  \item 2D Map Planning
+  \item Update Sensory Information
+  \item Constantly Update
+  \end{itemize}
+\myfigure{Images/MultithreadedProcess.png}{}{0.25}
+\end{frame}
+
+\subsubsection{User Interface}
+\begin{frame}{User Interface}
+  \begin{itemize}
+  \item Algorithm Selection(On Same Data)
+  \item Select Various Maps
+  \end{itemize}
+\myfigure{Images/SoftwareDesign/GUISample}{A Possible GUI Design}{0.5}
+\end{frame}
+\subsection{Path-Planning}
+\subsubsection{Graph Traversal Algorithms}
+\begin{frame}{A*}
+  \begin{itemize}
+  \item Promises:
+    \begin{itemize}
+    \item Optimality
+    \item Completeness
+    \end{itemize}
+  \item Drawbacks:
+    \begin{itemize}
+    \item Time complexity grows exponentially with added dimensions.
+    \item May be too slow for a constant stream of data
+    \end{itemize}
+  \end{itemize}
+  \begin{columns}
+    \column{0.5\textwidth}
+    \myfigure{Images/planningProblem}{A simple planning problem}{0.5}
+    \column{0.5\textwidth}
+    \myfigure{Images/planningSolution.png}{A possible solution}{0.5}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{D*}
+  \begin{itemize}
+  \item Promises:
+    \begin{itemize}
+    \item Optimality
+      \item Completeness
+        \item better at handling a new information
+    \end{itemize}
+  \item DrawBacks:
+    \begin{itemize}
+    \item Based on A* therefore same problem with added dimensions
+    \end{itemize}
+  \end{itemize}
+\myfigure{Images/DStarMap}{A map generated with D*}{.25}
+\end{frame}
+
+\subsubsection{Random-Sampling Algorithms}
+\begin{frame}{Rapidly-Randomly Trees}
+  \begin{itemize}
+  \item No Promises
+  \item Work at decent speeds at higher dimensions
+  \end{itemize}
+  \myfigure{Images/SamplePlanning/RRTgraph1.png}{What A Rapidly-Randomly Exploring Tree Looks Like}{0.25}
+\end{frame}
+
+\begin{frame}{Bidirectional RRT}
+  \begin{itemize}
+  \item Much faster than traditional RRT's
+  \item Still no Promises of Optimality
+  \end{itemize}
+  \myfigure{Images/SamplePlanning/BidirectionalRRT.png}{A Bidirectional RRT}{0.25}
+\end{frame}
+
+\begin{frame}{RRT*}
+  \begin{itemize}
+  \item Promises to be asymptotic optimal.
+  \item rewires the tree to accept new useful information
+  \item Adds all new points to the tree(higher memory usage)
+  \end{itemize}
+\myfigure{Images/SamplePlanning/rrtvsrrtstar2}{Comparison between RRT* and RRT's}{0.5}
+\end{frame}
+
+\begin{frame}{RRT\#}
+  \begin{itemize}
+  \item Same Promises as RRT*
+  \item Does not keep all points in the tree(only relevant ones)
+  \item less memory usage more difficult to implement(no library)
+  \end{itemize}
+\myfigure{Images/SamplePlanning/RRSharpvsRRTStar.png}{Comparison between RRT* and RRT\#}{0.5}
+\end{frame}
+
+\begin{frame}{RRT Comparison}
+\includemedia[
+  width=0.4\linewidth,
+  height=0.3\linewidth,
+  activate=pageopen,
+  addresource=./Videos/d2pt1rrtstar.MP4,
+  flashvars={source=./Videos/d2p1rrtstar.MP4}
+]{}{VPlayer.swf}
+\end{frame}
+
+\section{Conclusion}
+\begin{frame}{Conclusion}
+  \begin{itemize}
+  \item Focus on Reusable application for future iterations or GTRI
+  \item Algorithms are important but not our main focus (we have already implemented many of them)
+  \item Extensible application to help test other planning and perception systems. 
+  \item A lasting code base
+  \end{itemize}
+\end{frame}
+\section*{References}
+\begin{frame}[allowframebreaks]{References}
+  \begin{thebibliography}{20}
+  \bibitem{VisionRobotics} \href{http://visionrobotics.com/vrc/index.php?option=com_zoom&Itemid=26&catid=6}{Vision Robotics}
+  \bibitem{wallye} \href{http://wall-ye.com/}{Wall-Ye}
+  \bibitem{roboticcharvest} \href{http://www.roboticharvesting.com/products.html}{Robotic Harvesting}
+  \bibitem{kuka} \href{http://www.kuka-labs.com/en/service_robotics/research_education/youbot/}{Kuka Labs}
+  \bibitem{robocup} \href{http://www.robocupatwork.org/download/RoboCup-At-Work_Camp_2012/RAW_Camp2012-Jan-Paulus_youBotAPI.pdf}{RoboCup}
+  \bibitem{metu} \href{http://www.eee.metu.edu.tr/~ee402/2013/EE402RecitationReport_4.pdf}{Metu}
+  \bibitem{Astar} \href{http://en.wikipedia.org/wiki/A*_search_algorithm}{A*}
+  \bibitem{AstarTutorial} \href{http://www.policyalmanac.org/games/aStarTutorial.htm}{A* Tutorial}
+  \bibitem{AstarCompare} \href{http://theory.stanford.edu/~amitp/GameProgramming/AStarComparison.html}{A* Comparison}
+  \bibitem{heuristics} \href{http://www.policyalmanac.org/games/heuristics.htm}{Heuristics}
+  \bibitem{dynamicp} \href{http://www.frc.ri.cmu.edu/~axs/dynamic_plan.html}{Dynamic Planning}
+  \bibitem{dstar} \href{http://en.wikipedia.org/wiki/D*}{D*}
+  \bibitem{RRT} \href{http://msl.cs.uiuc.edu/rrt/papers.html}{Rapidly-Exploring Random Trees}
+  \bibitem{RRTBidi} \href{http://people.csail.mit.edu/aperez/obirrt/}{Bidirectional RRTs}
+  \bibitem{RRTstar} \href{http://sertac.scripts.mit.edu/web/?page_id=15}{RRT*}
+  \bibitem{RRTsharp} \href{http://ieeexplore.ieee.org/xpl/login.jsp?tp=&arnumber=6630906&url=http://ieeexplore.ieee.org/iel7/6615630/6630547/06630906.pdf?arnumber=6630906}{RRT\#}
+  \bibitem{kdtree} \href{https://www.cise.ufl.edu/class/cot5520fa09/CG_RangeKDtrees.pdf}{K-D Trees}
+    \end{thebibliography}
+\end{frame}
+\end{document}
+
