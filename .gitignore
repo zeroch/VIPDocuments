@@ -1,0 +1,9 @@
+*.pdf
+*.aux
+*.out
+*.log
+*.nav
+*.snm
+*.toc
+*.odg
+Presentation/Videos/
