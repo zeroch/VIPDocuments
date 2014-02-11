@@ -1,0 +1,67 @@
+###########
+Docs by Ze Chen 
+02-10-14
+###########
+
+******** usage *********
+
+We don't want to polute the source files. so we need everyone build the project as out-of-source method.  so we can build and run the code in a seperate folder(dir build in here) and we just need to delete everything in this folder. 
+
+a) use qt-creator. 
+
+	if you want to use qt-creator to write code. follow this instruction. 
+		1. open qt-creator, tools -  build&run - CMake 
+			set the cmake binary. 
+		2. file - open a project - CMakeLists.txt (at the root one)
+		3. set build folder as build directory. 
+		4. run cmake
+			 	you should see something like below . 
+					 	-- The C compiler identification is Clang 5.0.0
+						-- The CXX compiler identification is Clang 5.0.0
+						-- Check for working C compiler: /usr/bin/cc
+						-- Check for working C compiler: /usr/bin/cc -- works
+						-- Detecting C compiler ABI info
+						-- Detecting C compiler ABI info - done
+						-- Check for working CXX compiler: /usr/bin/c++
+						-- Check for working CXX compiler: /usr/bin/c++ -- works
+						-- Detecting CXX compiler ABI info
+						-- Detecting CXX compiler ABI info - done
+						-- This is BINARY dir /Users/a/dev/GTRI/VIPDocuments/PlanningAndControls
+						-- Configuring done
+						-- Generating done
+						-- Build files have been written to: /Users/a/dev/GTRI/VIPDocuments/PlanningAndControls/build
+
+		5. build and run. 
+			you should be able to run the project, see the hellow world at the app output. 
+
+b) cmake and cl
+
+	this is much easier if you don't have to deal with GUI dev. 
+
+		1. cd build
+		2. cmake ..
+		3. make
+
+	see done. 
+	what happend here, We make all compile rules in the each CMakeLists.txt
+	"cmake .." proecess root CMakeLists.txt and it will call its dependencies to sub folder. generate a project makefile at the build folder. 
+	run "make" to compile the project. 
+	
+	libraries place at lib/ 
+	binaries place at bin/
+
+
+Well, Happy Coding!
+
+*********** basic cmake *********
+
+CMakeLists.txt should be place in every folders that they are necessary for building project. 
+tree.txt is the tree structure for this project folder. 
+
+the root CMakeLists.txt define the project. it has two sub_projects : main and util(the hello class)
+src folder --> CMakeLists.txt define two subdirs are need to be compiled. 
+main folder --> CMakeLists.txt compile main.cpp but with dependency of util. 
+util folder --> CMakeLists.txt compile hello class and generate static library and place to lib folder. 
+
+
+************* end cmake ************

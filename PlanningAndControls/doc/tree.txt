@@ -1,0 +1,25 @@
+.
+|-- CMakeLists.txt
+|-- bin
+|   `-- readme.txt
+|-- build
+|   `-- readme.txt
+|-- doc
+|   |-- README.txt
+|   `-- tree.txt
+|-- include
+|   |-- hello.h
+|   `-- readme.txt
+|-- lib
+|   `-- readme.txt
+`-- src
+    |-- CMakeLists.txt
+    |-- main
+    |   |-- CMakeLists.txt
+    |   `-- main.cpp
+    |-- readme.txt
+    `-- util
+        |-- CMakeLists.txt
+        `-- hello.cpp
+
+8 directories, 14 files
