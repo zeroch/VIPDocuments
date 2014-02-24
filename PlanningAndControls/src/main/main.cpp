@@ -1,15 +1,11 @@
-#include <iostream>
-#include "../../include/hello.h"
+#include "mainwindow.h"
+#include <QApplication>
 
-using namespace std;
-
-int main(int argc, char const *argv[])
+int main(int argc, char *argv[])
 {
-	
-	hello myhello;
+    QApplication a(argc, argv);
+    MainWindow w;
+    w.show();
 
-	myhello.message();
-
-
-	return 0;
+    return a.exec();
 }
