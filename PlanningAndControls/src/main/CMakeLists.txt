@@ -1,5 +1,23 @@
 cmake_minimum_required(VERSION 2.8.11)
 
+
+message(STATUS ${QTDIR})
+# QT_Dir configure. 
+if (DEFINED ENV{QTDIR})
+    set(CMAKE_PREFIX_PATH $ENV{QTDIR} ${CMAKE_PREFIX_PATH})
+    message(${CMAKE_PREFIX_PATH})
+    MESSAGE(STATUS "HELLE")
+
+elseif (DEFINED QTDIR)
+    MESSAGE(STATUS "HELLOE")
+    set(CMAKE_PREFIX_PATH ${QTDIR} ${CMAKE_PREFIX_PATH})
+    message(STATUS ${CMAKE_PREFIX_PATH})
+else ()
+    message(STATUS ${CMAKE_PREFIX_PATH})
+
+endif()
+
+
 # Find the QtWidgets library
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Core)

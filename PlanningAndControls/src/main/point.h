@@ -1,3 +1,5 @@
+#ifndef POINT_H
+#define POINT_H
 class Point
 {
 public:
@@ -11,4 +13,4 @@ private:
 	int num_dimemsion;
 	int *coordinates;
 };
-
+#endif  // POINT_H
