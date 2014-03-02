@@ -1,10 +1,16 @@
 cmake_minimum_required(VERSION 2.8)
 
-SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
+# this is a seperate project for testing purpose 
+project(point)
 
-#for formal GUI app, hello is disable right now. 
-#SET(SRC_LIST hello.cpp)
+SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/../../bin)
+set(CMAKE_CXX_FLAGS "-std=c++11")
 
-#INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
+include_directories(${PROJECT_SOURCE_DIR}/../common)
+# test demo for Points and space 
+SET(point_src main.cpp)
+LINK_DIRECTORIES(${PROJECT_SOURCE_DIR}/../../lib)
 
-#ADD_LIBRARY(util STATIC ${SRC_LIST} ${Qt5Widgets_LIBRARIES})
+add_executable(point ${point_src} )
+
+target_link_libraries(point  common)
