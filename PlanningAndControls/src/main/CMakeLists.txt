@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 2.8.11)
 
 
-message(STATUS ${QTDIR})
 # QT_Dir configure. 
 if (DEFINED ENV{QTDIR})
     set(CMAKE_PREFIX_PATH $ENV{QTDIR} ${CMAKE_PREFIX_PATH})
