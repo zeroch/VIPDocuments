@@ -8,6 +8,11 @@
 #include "QPushButton"
 #include "QTextEdit"
 #include "QStringListModel"
+#include "QGraphicsView"
+#include <QGraphicsScene>
+#include <QGraphicsPixmapItem>
+#include <QImage>
+#include <QDebug>
 
 class MainWindow : public QMainWindow
 {
@@ -19,15 +24,15 @@ public:
 
 private slots:
     void appLog();
-
+    void selectImage();
 private:
     void creatList();
     void creatButtonGroup();
     void creatTopGroup();
     void creatBotGroup();
-    void creatCavan();
+    void creatDisplay();
     void creatLog();
-
+    void reloadDisplay();
     enum {numGridRows = 2,numButtons = 3};
 
     // these are widget place at top group
@@ -39,6 +44,13 @@ private:
     QGroupBox *m_topGroup;
     QGroupBox *m_botGroup;
 
+    // map display
+    QGraphicsView *m_view;
+    QGraphicsScene *m_scene;
+    QImage *m_image;
+    QGraphicsPixmapItem *m_pixItem;
+    QPushButton *m_browseFile;
+    QString fileName;
     // widgets place at bot group
     // log panel
     QTextEdit *m_log;

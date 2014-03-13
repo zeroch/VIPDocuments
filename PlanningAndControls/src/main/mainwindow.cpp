@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 
 
-
+#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
@@ -14,6 +14,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
       setWindowTitle(tr("GTRI"));
       creatList();
+      creatDisplay();
       creatButtonGroup();
       creatLog();
       // for layout purpose need top and bot place in diff widget
@@ -84,7 +85,38 @@ void MainWindow::creatBotGroup(){
       QHBoxLayout *botLayout =new QHBoxLayout;
       botLayout->addWidget(m_log);
       botLayout->addWidget(m_testLog);
+      botLayout->addWidget(m_browseFile);
+      botLayout->addWidget(m_view);
       m_botGroup->setLayout(botLayout);
+}
+
+void MainWindow::creatDisplay(){
+
+      m_image = new QImage();
+      bool insp = m_image->load("");
+      if(!insp){
+          qDebug() << "[DEBUG] image loading error";
+      }
+      m_scene = new QGraphicsScene();
+      m_pixItem = new QGraphicsPixmapItem(QPixmap::fromImage(*m_image));
+      m_scene->addItem(m_pixItem);
+      m_view = new QGraphicsView(m_scene);
+      m_view->show();
+      m_browseFile = new QPushButton();
+      m_browseFile->setText("Browse");
+      connect(m_browseFile,SIGNAL(clicked()),this,SLOT(selectImage()));
+}
+
+void MainWindow::reloadDisplay(){
+
+    m_scene->clear();
+    bool insp = m_image->load(fileName);
+    if(!insp){
+        qDebug() << "[DEBUG] image loading error";
+    }
+    m_pixItem = new QGraphicsPixmapItem(QPixmap::fromImage(*m_image));
+    m_scene->addItem(m_pixItem);
+    m_log->append(QString("loading map: %1").arg(fileName));
 }
 
 void MainWindow::creatLog(){
@@ -94,7 +126,6 @@ void MainWindow::creatLog(){
     m_log->append("appending some text..");
     m_log->setReadOnly(true);
     m_log->show();
-
     m_testLog = new QPushButton();
     m_testLog->setText("Test");
     _numTestLog = 0;
@@ -104,4 +135,11 @@ void MainWindow::creatLog(){
 void MainWindow::appLog(){
     ++_numTestLog;
     m_log->append(QString("Updating string by pushbutton: %1 ").arg(_numTestLog));
+}
+
+void MainWindow::selectImage(){
+     fileName = QFileDialog::getOpenFileName(this,
+        tr("Open Image"), "/home/ze", tr("Image Files (*.png *.jpg *.bmp *.pgm)"));
+    qDebug()<< fileName;
+    reloadDisplay();
 }
