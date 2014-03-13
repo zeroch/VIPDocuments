@@ -2,7 +2,7 @@
 #define SPACE2D_H
 #include "space.h"
 #include "point2d.h"
-#include <list>
+#include <vector>
 #include <iostream>
 #include <string.h>
 extern "C"{
@@ -13,15 +13,20 @@ extern "C"{
 class Space2D : public Space
 {
 public:
-	Space2D();
+    Space2D();
 	virtual ~Space2D();
 	void add_point(Point2D*);
 	void initialSpace(unsigned int ** raw, Point2D  start_, Point2D  end_, int * resolution);
 	void initFromPgm(char*);
 	void printSpace();
+    Point * randomPoint();
+    Point * findPoint(int*);
+    int get_maxDimension(int dimension);
+    Point * get_start();
+    Point * get_end();
+    std::vector<Point *> getNeighbors(Point *);
 private:
-	std::list<Point2D *> *worldMap;
-	int maxValuePerDimension[2];
+    std::vector<Point2D *> *worldMap;
 	/* data */
 };
 
