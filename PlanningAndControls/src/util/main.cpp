@@ -18,7 +18,7 @@ int main(int argc, char  *argv[])
 
     // test to read pgm
     char *filename="../pic/circular_map.pgm";
-    my_space->initFromPgm(filename);
+    my_space->initFromImage(filename);
     my_space->printSpace();
 	/* code */
     return 0;

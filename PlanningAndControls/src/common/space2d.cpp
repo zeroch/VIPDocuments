@@ -38,13 +38,12 @@ void Space2D::initialSpace(unsigned int ** raw, Point2D  start_, Point2D  end_, 
 
 }
 
-void Space2D::initFromPgm(char *filename){
-    gray **image;
-    gray max;
+void Space2D::initFromImage(char *filename){
     int cols, rows;
-
-    FILE *file = pm_openr(filename);
-    image = pgm_readpgm(file, &cols, &rows, &max);
+    m_rawImage = new QImage();
+    m_rawImage->load(filename);
+    rows = m_rawImage->width();
+    cols = m_rawImage->height();
     maxValuePerDimension[0] = rows;
     maxValuePerDimension[1] = cols;
     
@@ -54,7 +53,7 @@ void Space2D::initFromPgm(char *filename){
         {
             int coordinate[2] = { i , j };
             bool valid_;
-            if(image[i][j] == 0){
+            if(m_rawImage->pixelIndex(i,j) == 0){
                 valid_ = true;
             }else valid_ = false;
             Point2D * new_point = new Point2D(coordinate, valid_);
