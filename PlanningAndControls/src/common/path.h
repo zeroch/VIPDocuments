@@ -1,5 +1,5 @@
 #include <queue>
-
+#include "point.h"
 
 class Path
 {
